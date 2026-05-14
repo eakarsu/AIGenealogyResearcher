@@ -18,16 +18,26 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
   const [aiResult, setAiResult] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 1, limit: 20 });
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3500);
+    setTimeout(() => setToast(null), 4000);
   };
 
-  const fetchRecords = useCallback(async () => {
+  const fetchRecords = useCallback(async (p = 1) => {
     try {
-      const data = await getAll(tableName);
-      setRecords(Array.isArray(data) ? data : []);
+      const data = await getAll(tableName, p, 20);
+      if (data && data.data) {
+        setRecords(Array.isArray(data.data) ? data.data : []);
+        setPagination(data.pagination || { total: 0, totalPages: 1, limit: 20 });
+      } else if (Array.isArray(data)) {
+        setRecords(data);
+        setPagination({ total: data.length, totalPages: 1, limit: 20 });
+      } else {
+        setRecords([]);
+      }
     } catch (err) {
       console.error('Failed to fetch records:', err);
       if (err.response?.status === 401) navigate('/');
@@ -39,7 +49,8 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) { navigate('/'); return; }
-    fetchRecords();
+    setPage(1);
+    fetchRecords(1);
   }, [navigate, fetchRecords]);
 
   const handleSave = async (data) => {
@@ -53,7 +64,7 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
       }
       setShowForm(false);
       setEditData(null);
-      fetchRecords();
+      fetchRecords(page);
     } catch (err) {
       showToast(err.response?.data?.error || 'Failed to save record', 'error');
     }
@@ -65,7 +76,7 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
       await deleteRecord(tableName, id);
       showToast('Record deleted successfully');
       setSelectedRecord(null);
-      fetchRecords();
+      fetchRecords(page);
     } catch (err) {
       showToast(err.response?.data?.error || 'Failed to delete record', 'error');
     }
@@ -77,18 +88,36 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
     setShowForm(true);
   };
 
-  const handleAiQuery = async () => {
-    if (!aiInput.trim()) return;
+  const handleAiQuery = async (prefillRecord = null) => {
+    const query = prefillRecord
+      ? `Analyze this record: ${JSON.stringify(prefillRecord)}`
+      : aiInput;
+    if (!query.trim()) return;
     setAiLoading(true);
     setAiResult(null);
     try {
-      const result = await aiQuery(aiFeature, { query: aiInput });
+      const payload = { query };
+      if (prefillRecord && prefillRecord.id) {
+        payload.record_id = prefillRecord.id;
+      }
+      const result = await aiQuery(aiFeature, payload);
       setAiResult(result);
+      if (prefillRecord) {
+        setAiInput(`Analyze this record: ${JSON.stringify(prefillRecord)}`);
+      }
     } catch (err) {
-      showToast(err.response?.data?.error || 'AI analysis failed', 'error');
+      const msg = err.isRateLimit
+        ? err.message
+        : (err.response?.data?.error || 'AI analysis failed');
+      showToast(msg, 'error');
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    fetchRecords(newPage);
   };
 
   return (
@@ -108,7 +137,7 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
           <div>
             <h1 style={styles.title}>{displayName}</h1>
             <p style={styles.subtitle}>
-              {records.length} record{records.length !== 1 ? 's' : ''} found
+              {pagination.total} record{pagination.total !== 1 ? 's' : ''} found
             </p>
           </div>
           <button className="btn btn-primary" onClick={() => { setEditData(null); setShowForm(true); }}>
@@ -137,7 +166,7 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
               </div>
               <button
                 className="btn btn-accent"
-                onClick={handleAiQuery}
+                onClick={() => handleAiQuery()}
                 disabled={aiLoading || !aiInput.trim()}
               >
                 {aiLoading ? (
@@ -174,31 +203,92 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
               </p>
             </div>
           ) : (
-            <div style={styles.tableWrapper}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    {columns.map((col) => (
-                      <th key={col.key}>{col.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {records.map((record, idx) => (
-                    <tr
-                      key={record.id || idx}
-                      onClick={() => setSelectedRecord(record)}
-                      style={{ animationDelay: `${idx * 0.03}s` }}
-                      className="animate-fade-in"
-                    >
+            <>
+              <div style={styles.tableWrapper}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
                       {columns.map((col) => (
-                        <td key={col.key}>{record[col.key] ?? '-'}</td>
+                        <th key={col.key}>{col.label}</th>
                       ))}
+                      {aiFeature && <th>AI</th>}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {records.map((record, idx) => (
+                      <tr
+                        key={record.id || idx}
+                        style={{ animationDelay: `${idx * 0.03}s` }}
+                        className="animate-fade-in"
+                      >
+                        {columns.map((col) => (
+                          <td key={col.key} onClick={() => setSelectedRecord(record)} style={{ cursor: 'pointer' }}>
+                            {record[col.key] ?? '-'}
+                          </td>
+                        ))}
+                        {aiFeature && (
+                          <td>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleAiQuery(record); }}
+                              disabled={aiLoading}
+                              title="Analyze this record with AI"
+                              style={{
+                                padding: '4px 10px', borderRadius: 5, border: 'none',
+                                background: '#6c63ff', color: '#fff', cursor: 'pointer',
+                                fontSize: '0.75rem', fontWeight: 600,
+                                opacity: aiLoading ? 0.5 : 1,
+                              }}
+                            >
+                              AI
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {pagination.totalPages > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '16px' }}>
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page <= 1}
+                    style={paginationBtnStyle(page <= 1)}
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                    .filter((p) => p === 1 || p === pagination.totalPages || Math.abs(p - page) <= 2)
+                    .map((p, i, arr) => (
+                      <React.Fragment key={p}>
+                        {i > 0 && arr[i - 1] !== p - 1 && <span style={{ color: '#71717a' }}>…</span>}
+                        <button
+                          onClick={() => handlePageChange(p)}
+                          style={{
+                            padding: '6px 12px', borderRadius: 6, border: '1px solid',
+                            borderColor: p === page ? '#6c63ff' : '#2a2e45',
+                            background: p === page ? '#6c63ff' : '#0f1117',
+                            color: '#e4e4e7', cursor: 'pointer', fontWeight: p === page ? 700 : 400,
+                          }}
+                        >
+                          {p}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page >= pagination.totalPages}
+                    style={paginationBtnStyle(page >= pagination.totalPages)}
+                  >
+                    Next
+                  </button>
+                  <span style={{ color: '#71717a', fontSize: '0.8rem' }}>
+                    Page {page} of {pagination.totalPages} ({pagination.total} total)
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -226,6 +316,15 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
     </div>
   );
 };
+
+function paginationBtnStyle(disabled) {
+  return {
+    padding: '6px 14px', borderRadius: 6, border: '1px solid #2a2e45',
+    background: disabled ? '#0f1117' : '#1a1d2e',
+    color: '#e4e4e7', cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+  };
+}
 
 const styles = {
   page: {

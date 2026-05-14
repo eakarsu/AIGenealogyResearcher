@@ -13,7 +13,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 responses
+// Handle 401 and 429 responses
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -22,6 +22,14 @@ api.interceptors.response.use(
       if (window.location.pathname !== '/') {
         window.location.href = '/';
       }
+    }
+    if (error.response && error.response.status === 429) {
+      const rateLimitError = new Error(
+        (error.response.data && error.response.data.error) ||
+        'AI rate limit exceeded. Max 20 requests per hour. Please try again later.'
+      );
+      rateLimitError.isRateLimit = true;
+      return Promise.reject(rateLimitError);
     }
     return Promise.reject(error);
   }
@@ -47,8 +55,9 @@ export const getMe = async () => {
 const toRoute = (table) => table.replace(/_/g, '-');
 
 // CRUD
-export const getAll = async (table) => {
-  const res = await api.get(`/${toRoute(table)}`);
+export const getAll = async (table, page = 1, limit = 20) => {
+  const res = await api.get(`/${toRoute(table)}?page=${page}&limit=${limit}`);
+  // Support both paginated { data, pagination } and plain array responses
   return res.data;
 };
 
@@ -75,6 +84,22 @@ export const deleteRecord = async (table, id) => {
 // AI
 export const aiQuery = async (feature, data) => {
   const res = await api.post(`/ai/${feature}`, data);
+  return res.data;
+};
+
+// Relationships
+export const getRelationships = async (page = 1, limit = 20) => {
+  const res = await api.get(`/relationships?page=${page}&limit=${limit}`);
+  return res.data;
+};
+
+export const createRelationship = async (data) => {
+  const res = await api.post('/relationships', data);
+  return res.data;
+};
+
+export const deleteRelationship = async (id) => {
+  const res = await api.delete(`/relationships/${id}`);
   return res.data;
 };
 

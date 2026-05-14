@@ -229,6 +229,7 @@ async function initDB() {
         feature VARCHAR(255),
         query TEXT,
         result TEXT,
+        user_id INTEGER,
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);

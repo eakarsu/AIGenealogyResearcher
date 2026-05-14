@@ -4,7 +4,7 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 async function callAI(systemPrompt, userMessage) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const model = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022';
 
   if (!apiKey) {
     throw new Error('OPENROUTER_API_KEY is not set in environment variables');
@@ -19,6 +19,7 @@ async function callAI(systemPrompt, userMessage) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage },
         ],
+        max_tokens: 2000,
       },
       {
         headers: {
@@ -43,16 +44,23 @@ async function callAI(systemPrompt, userMessage) {
   }
 }
 
-async function analyzeHistoricalRecord(query) {
+async function analyzeHistoricalRecord(query, record = null) {
   const systemPrompt =
     'You are an expert genealogist specializing in historical records analysis. Analyze the provided historical record information and extract key genealogical details such as names, dates, locations, relationships, and any other relevant information. Provide insights about the historical context and suggest related records to investigate.';
-  return callAI(systemPrompt, query);
+  let message = query;
+  if (record) {
+    message = `Here is the existing DB record: ${JSON.stringify(record, null, 2)}\n\nUser question: ${query}`;
+  }
+  return callAI(systemPrompt, message);
 }
 
-async function analyzeDNAMatch(matchData) {
+async function analyzeDNAMatch(matchData, record = null) {
   const systemPrompt =
     'You are a genetic genealogy expert. Analyze the provided DNA match data including shared centimorgans, segments, and any known relationships. Estimate the most likely relationship between the individuals, suggest possible common ancestors, and recommend next steps for confirming the connection.';
-  const message = typeof matchData === 'string' ? matchData : JSON.stringify(matchData);
+  let message = typeof matchData === 'string' ? matchData : JSON.stringify(matchData);
+  if (record) {
+    message = `Here is the existing DB record: ${JSON.stringify(record, null, 2)}\n\nUser question: ${message}`;
+  }
   return callAI(systemPrompt, message);
 }
 
@@ -123,11 +131,49 @@ async function analyzeNameOrigin(name) {
   return callAI(systemPrompt, name);
 }
 
-async function generateTimeline(personData) {
+async function generateTimeline(personData, dbContext = null) {
   const systemPrompt =
-    'You are a genealogist who creates detailed life timelines. Based on the provided person data, generate a chronological timeline of key life events including birth, education, marriage, children, occupations, residences, military service, immigration, and death. Include historical context for each period. Format the timeline clearly with dates and descriptions.';
-  const message = typeof personData === 'string' ? personData : JSON.stringify(personData);
+    'You are a genealogist who creates detailed life timelines. Based on the provided person data and any associated records, generate a chronological timeline of key life events including birth, education, marriage, children, occupations, residences, military service, immigration, and death. Include historical context for each period. Format the timeline clearly with dates and descriptions.';
+  let message = typeof personData === 'string' ? personData : JSON.stringify(personData);
+  if (dbContext) {
+    message = `Here are the database records found for this person across multiple record types:\n${JSON.stringify(dbContext, null, 2)}\n\nPlease generate a comprehensive timeline: ${message}`;
+  }
   return callAI(systemPrompt, message);
+}
+
+// Resolve conflicts between contradictory genealogical records
+async function resolveConflict(query) {
+  const systemPrompt = `You are an expert genealogist resolving conflicts between primary records (census, church, military, immigration, etc.).
+Weigh source reliability, transcription error patterns, name variants, and date conventions (e.g. census enumeration vs. actual birth date).
+Return STRICT JSON only:
+{
+  "summary": "...",
+  "candidate_resolutions": [
+    { "value": "string|date|number", "confidence_pct": 0, "supporting_sources": ["..."], "rationale": "string" }
+  ],
+  "most_likely_value": "string",
+  "follow_up_research": ["..."],
+  "transcription_error_risks": ["..."],
+  "disclaimer": "AI assists; verify with original images when possible."
+}`;
+  return callAI(systemPrompt, JSON.stringify(query));
+}
+
+// Generate the next-best research roadmap given known ancestors and progress
+async function generateRoadmap(query) {
+  const systemPrompt = `You are an expert research planner for genealogy. Given a person's known facts and the user's research progress, produce the next 5-10 most efficient research steps.
+Return STRICT JSON only:
+{
+  "summary": "...",
+  "next_steps": [
+    { "step": "string", "source_type": "census|church|land|military|immigration|newspaper|dna|other", "expected_payoff": "low|medium|high", "estimated_effort": "low|medium|high", "rationale": "string" }
+  ],
+  "low_hanging_fruit": ["..."],
+  "deferred_until_breakthrough": ["..."],
+  "tools_or_databases_to_use": ["FamilySearch", "Ancestry", "FindMyPast", "..."],
+  "disclaimer": "Suggestions only."
+}`;
+  return callAI(systemPrompt, JSON.stringify(query));
 }
 
 module.exports = {
@@ -145,4 +191,6 @@ module.exports = {
   estimateEthnicity,
   analyzeNameOrigin,
   generateTimeline,
+  resolveConflict,
+  generateRoadmap,
 };

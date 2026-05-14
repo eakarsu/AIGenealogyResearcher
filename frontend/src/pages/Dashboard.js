@@ -4,7 +4,7 @@ import {
   FaUsers, FaTree, FaSearch, FaDna, FaFileAlt, FaShip, FaChurch,
   FaNewspaper, FaMedal, FaLandmark, FaHeart, FaBaby, FaGlobeAmericas,
   FaBook, FaStickyNote, FaQuoteRight, FaBrain, FaFont, FaClock,
-  FaFileInvoice
+  FaFileInvoice, FaBalanceScale
 } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import { getAll } from '../services/api';
@@ -13,7 +13,7 @@ const iconMap = {
   FaUsers, FaTree, FaSearch, FaDna, FaFileAlt, FaShip, FaChurch,
   FaNewspaper, FaMedal, FaLandmark, FaHeart, FaBaby, FaGlobeAmericas,
   FaBook, FaStickyNote, FaQuoteRight, FaBrain, FaFont, FaClock,
-  FaFileInvoice
+  FaFileInvoice, FaBalanceScale
 };
 
 const features = [
@@ -39,6 +39,8 @@ const aiOnlyFeatures = [
   { path: 'ethnicity-estimation', name: 'Ethnicity Estimation', icon: 'FaBrain', description: 'AI-powered ethnic origin estimation', color: '#6c63ff' },
   { path: 'name-origin', name: 'Name Origin Analysis', icon: 'FaFont', description: 'Discover the origin and meaning of names', color: '#00d4aa' },
   { path: 'timeline-generator', name: 'Timeline Generator', icon: 'FaClock', description: 'Generate life timelines from records', color: '#f59e0b' },
+  { path: 'relationship-graph', name: 'Relationship Graph', icon: 'FaUsers', description: 'Visualize and manage person relationships', color: '#ec4899' },
+  { path: 'ai-advanced', name: 'AI Advanced (Conflict / Roadmap)', icon: 'FaBalanceScale', description: 'Conflict resolution + research roadmap', color: '#a855f7' },
 ];
 
 const Dashboard = () => {
@@ -52,11 +54,12 @@ const Dashboard = () => {
       return;
     }
 
-    // Fetch counts for each table
+    // Fetch counts for each table (paginated response)
     features.forEach(async (f) => {
       try {
-        const data = await getAll(f.table);
-        setCounts((prev) => ({ ...prev, [f.table]: Array.isArray(data) ? data.length : 0 }));
+        const data = await getAll(f.table, 1, 1);
+        const count = data && data.pagination ? data.pagination.total : (Array.isArray(data) ? data.length : 0);
+        setCounts((prev) => ({ ...prev, [f.table]: count }));
       } catch {
         setCounts((prev) => ({ ...prev, [f.table]: 0 }));
       }

@@ -7,7 +7,18 @@ const { initDB } = require('./db');
 const authRoutes = require('./routes/auth');
 const aiRoutes = require('./routes/ai');
 const createCrudRouter = require('./routes/crud');
+const relationshipsRouter = require('./routes/relationships');
 
+// === Batch 04 Gaps & Frontend Mounts ===
+const route_gap_no_conflict_resolution_endpoint_for_disa = require('./routes/gap-no-conflict-resolution-endpoint-for-disa');
+const route_gap_no_research_roadmap_recommender_for_next = require('./routes/gap-no-research-roadmap-recommender-for-next');
+const route_gap_no_record_source_citation_generator = require('./routes/gap-no-record-source-citation-generator');
+const route_gap_no_family_tree_visualization_ui_module = require('./routes/gap-no-family-tree-visualization-ui-module');
+const route_gap_no_real_time_collaboration_on_shared = require('./routes/gap-no-real-time-collaboration-on-shared');
+const route_gap_no_expert_review_workflow_professional_g = require('./routes/gap-no-expert-review-workflow-professional-g');
+const route_gap_no_audit_log_0_references_found = require('./routes/gap-no-audit-log-0-references-found');
+const route_gap_no_notification_engine_0_references = require('./routes/gap-no-notification-engine-0-references');
+const route_gap_limited_support_for_non_us_archives = require('./routes/gap-limited-support-for-non-us-archives');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -20,6 +31,9 @@ app.use('/api/auth', authRoutes);
 
 // AI routes
 app.use('/api/ai', aiRoutes);
+
+// Relationships route
+app.use('/api/relationships', relationshipsRouter);
 
 // CRUD routes for all tables
 const tableConfigs = {
@@ -47,6 +61,12 @@ for (const [table, columns] of Object.entries(tableConfigs)) {
   app.use(routePath, createCrudRouter(table, columns));
 }
 
+// Apply pass 5 — additive mechanical routes
+app.use('/api/document-registry', require('./routes/documentRegistry'));
+app.use('/api/subscriptions', require('./routes/subscriptions'));
+app.use('/api/conflict-resolution', require('./routes/conflictResolution'));
+app.use('/api/research-roadmap', require('./routes/researchRoadmap'));
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -56,7 +76,18 @@ app.get('/api/health', (req, res) => {
 async function start() {
   try {
     await initDB();
-    app.listen(PORT, () => {
+    
+app.use('/api/gap-no-conflict-resolution-endpoint-for-disa', route_gap_no_conflict_resolution_endpoint_for_disa);
+app.use('/api/gap-no-research-roadmap-recommender-for-next', route_gap_no_research_roadmap_recommender_for_next);
+app.use('/api/gap-no-record-source-citation-generator', route_gap_no_record_source_citation_generator);
+app.use('/api/gap-no-family-tree-visualization-ui-module', route_gap_no_family_tree_visualization_ui_module);
+app.use('/api/gap-no-real-time-collaboration-on-shared', route_gap_no_real_time_collaboration_on_shared);
+app.use('/api/gap-no-expert-review-workflow-professional-g', route_gap_no_expert_review_workflow_professional_g);
+app.use('/api/gap-no-audit-log-0-references-found', route_gap_no_audit_log_0_references_found);
+app.use('/api/gap-no-notification-engine-0-references', route_gap_no_notification_engine_0_references);
+app.use('/api/gap-limited-support-for-non-us-archives', route_gap_limited_support_for_non_us_archives);
+
+app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {

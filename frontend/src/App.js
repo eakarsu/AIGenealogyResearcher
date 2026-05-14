@@ -4,6 +4,26 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import FeaturePage from './pages/FeaturePage';
 import AIOnlyPage from './pages/AIOnlyPage';
+import AIAdvancedPage from './pages/AIAdvancedPage';
+import RelationshipGraph from './pages/RelationshipGraph';
+import DocumentsAndPlanPage from './pages/DocumentsAndPlanPage';
+
+// === Batch 04 Gaps & Frontend Mounts ===
+import CfAgenticResearcherAutonomyConductingG from './pages/CfAgenticResearcherAutonomyConductingG';
+import CfMultiEvidenceFusionWeighingConflicti from './pages/CfMultiEvidenceFusionWeighingConflicti';
+import CfDnaDocumentFusionLinkingMatchesTo from './pages/CfDnaDocumentFusionLinkingMatchesTo';
+import CfTieredPrivacyWithAiRedactionWhen from './pages/CfTieredPrivacyWithAiRedactionWhen';
+import CfPaywallExpertGenealogistReviewMarket from './pages/CfPaywallExpertGenealogistReviewMarket';
+import CfInternationalArchivesExpansionUkCana from './pages/CfInternationalArchivesExpansionUkCana';
+import GapNoConflictResolutionEndpointForDisa from './pages/GapNoConflictResolutionEndpointForDisa';
+import GapNoResearchRoadmapRecommenderForNext from './pages/GapNoResearchRoadmapRecommenderForNext';
+import GapNoRecordSourceCitationGenerator from './pages/GapNoRecordSourceCitationGenerator';
+import GapNoFamilyTreeVisualizationUiModule from './pages/GapNoFamilyTreeVisualizationUiModule';
+import GapNoRealTimeCollaborationOnShared from './pages/GapNoRealTimeCollaborationOnShared';
+import GapNoExpertReviewWorkflowProfessionalG from './pages/GapNoExpertReviewWorkflowProfessionalG';
+import GapNoAuditLog0ReferencesFound from './pages/GapNoAuditLog0ReferencesFound';
+import GapNoNotificationEngine0References from './pages/GapNoNotificationEngine0References';
+import GapLimitedSupportForNonUsArchives from './pages/GapLimitedSupportForNonUsArchives';
 
 const features = [
   {
@@ -157,7 +177,27 @@ function App() {
         <Route path="/ethnicity-estimation" element={<AIOnlyPage feature="ethnicity-estimation" />} />
         <Route path="/name-origin" element={<AIOnlyPage feature="name-origin" />} />
         <Route path="/timeline-generator" element={<AIOnlyPage feature="timeline-generator" />} />
-      </Routes>
+        <Route path="/ai-advanced" element={<AIAdvancedPage />} />
+        <Route path="/relationship-graph" element={<RelationshipGraph />} />
+        <Route path="/documents-and-plan" element={<DocumentsAndPlanPage />} />
+      
+          {/* // === Batch 04 Gaps & Frontend Mounts === */}
+          <Route path="/cf-agentic-researcher-autonomy-conducting-g" element={<CfAgenticResearcherAutonomyConductingG />} />
+          <Route path="/cf-multi-evidence-fusion-weighing-conflicti" element={<CfMultiEvidenceFusionWeighingConflicti />} />
+          <Route path="/cf-dna-document-fusion-linking-matches-to" element={<CfDnaDocumentFusionLinkingMatchesTo />} />
+          <Route path="/cf-tiered-privacy-with-ai-redaction-when" element={<CfTieredPrivacyWithAiRedactionWhen />} />
+          <Route path="/cf-paywall-expert-genealogist-review-market" element={<CfPaywallExpertGenealogistReviewMarket />} />
+          <Route path="/cf-international-archives-expansion-uk-cana" element={<CfInternationalArchivesExpansionUkCana />} />
+          <Route path="/gap-no-conflict-resolution-endpoint-for-disa" element={<GapNoConflictResolutionEndpointForDisa />} />
+          <Route path="/gap-no-research-roadmap-recommender-for-next" element={<GapNoResearchRoadmapRecommenderForNext />} />
+          <Route path="/gap-no-record-source-citation-generator" element={<GapNoRecordSourceCitationGenerator />} />
+          <Route path="/gap-no-family-tree-visualization-ui-module" element={<GapNoFamilyTreeVisualizationUiModule />} />
+          <Route path="/gap-no-real-time-collaboration-on-shared" element={<GapNoRealTimeCollaborationOnShared />} />
+          <Route path="/gap-no-expert-review-workflow-professional-g" element={<GapNoExpertReviewWorkflowProfessionalG />} />
+          <Route path="/gap-no-audit-log-0-references-found" element={<GapNoAuditLog0ReferencesFound />} />
+          <Route path="/gap-no-notification-engine-0-references" element={<GapNoNotificationEngine0References />} />
+          <Route path="/gap-limited-support-for-non-us-archives" element={<GapLimitedSupportForNonUsArchives />} />
+</Routes>
     </Router>
   );
 }

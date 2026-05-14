@@ -57,11 +57,10 @@ const AIOnlyPage = ({ feature }) => {
 
   const fetchHistory = async () => {
     try {
-      const data = await getAll('ai_results');
-      if (Array.isArray(data)) {
-        const filtered = data.filter((r) => r.feature === config.aiFeature);
-        setHistory(filtered.slice(0, 10));
-      }
+      const data = await getAll('ai_results', 1, 50);
+      const rows = data && data.data ? data.data : (Array.isArray(data) ? data : []);
+      const filtered = rows.filter((r) => r.feature === config.aiFeature);
+      setHistory(filtered.slice(0, 10));
     } catch {
       // ai_results table may not exist, that's fine
     }
@@ -81,7 +80,10 @@ const AIOnlyPage = ({ feature }) => {
       setResult(data);
       fetchHistory();
     } catch (err) {
-      showToast(err.response?.data?.error || 'AI analysis failed', 'error');
+      const msg = err.isRateLimit
+        ? err.message
+        : (err.response?.data?.error || 'AI analysis failed');
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }
