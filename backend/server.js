@@ -67,6 +67,9 @@ app.use('/api/subscriptions', require('./routes/subscriptions'));
 app.use('/api/conflict-resolution', require('./routes/conflictResolution'));
 app.use('/api/research-roadmap', require('./routes/researchRoadmap'));
 
+// Custom Views (Genealogy Views) — mounted before any 404 handler
+app.use('/api/custom-views', require('./routes/customViews'));
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

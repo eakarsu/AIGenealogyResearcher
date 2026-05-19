@@ -24,6 +24,7 @@ import GapNoExpertReviewWorkflowProfessionalG from './pages/GapNoExpertReviewWor
 import GapNoAuditLog0ReferencesFound from './pages/GapNoAuditLog0ReferencesFound';
 import GapNoNotificationEngine0References from './pages/GapNoNotificationEngine0References';
 import GapLimitedSupportForNonUsArchives from './pages/GapLimitedSupportForNonUsArchives';
+import CustomViewsPage from './pages/CustomViewsPage';
 
 const features = [
   {
@@ -197,6 +198,7 @@ function App() {
           <Route path="/gap-no-audit-log-0-references-found" element={<GapNoAuditLog0ReferencesFound />} />
           <Route path="/gap-no-notification-engine-0-references" element={<GapNoNotificationEngine0References />} />
           <Route path="/gap-limited-support-for-non-us-archives" element={<GapLimitedSupportForNonUsArchives />} />
+          <Route path="/custom-views" element={<CustomViewsPage />} />
 </Routes>
     </Router>
   );
