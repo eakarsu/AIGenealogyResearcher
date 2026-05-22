@@ -113,7 +113,34 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <h2 style={styles.sectionTitle}>Research Collections</h2>
+        <h2 style={styles.sectionTitle}>Genealogy Views</h2>
+        <div style={styles.grid}>
+          <div
+            data-testid="genealogy-views-link"
+            style={styles.card}
+            className="dashboard-card"
+            onClick={() => navigate('/custom-views')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#6c63ff';
+              e.currentTarget.style.boxShadow = '0 8px 30px #6c63ff20, 0 0 20px #6c63ff10';
+              e.currentTarget.style.transform = 'translateY(-4px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#2a2e45';
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <div style={{ ...styles.iconCircle, background: '#6c63ff15' }}>
+              <FaTree style={{ ...styles.icon, color: '#6c63ff' }} />
+            </div>
+            <h3 style={styles.cardTitle}>Genealogy Views</h3>
+            <p style={styles.cardDesc}>Family tree, source coverage heatmap, research report PDF, and citation rules editor.</p>
+            <div style={styles.countBadge}>4 views</div>
+          </div>
+        </div>
+
+        <h2 style={{ ...styles.sectionTitle, marginTop: '48px' }}>Research Collections</h2>
         <div style={styles.grid}>
           {features.map((f) => renderCard(f))}
         </div>

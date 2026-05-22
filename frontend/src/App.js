@@ -25,6 +25,12 @@ import GapNoAuditLog0ReferencesFound from './pages/GapNoAuditLog0ReferencesFound
 import GapNoNotificationEngine0References from './pages/GapNoNotificationEngine0References';
 import GapLimitedSupportForNonUsArchives from './pages/GapLimitedSupportForNonUsArchives';
 import CustomViewsPage from './pages/CustomViewsPage';
+import EvidenceConfidenceLedger from './pages/EvidenceConfidenceLedger';
+
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
+import TimelineView from './pages/TimelineView';
 
 const features = [
   {
@@ -156,6 +162,10 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/insights/timeline" element={<TimelineView />} />
+        <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
+        <Route path="/codex/operations" element={<CodexOperationsFeature />} />
+
         <Route path="/" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
@@ -199,6 +209,7 @@ function App() {
           <Route path="/gap-no-notification-engine-0-references" element={<GapNoNotificationEngine0References />} />
           <Route path="/gap-limited-support-for-non-us-archives" element={<GapLimitedSupportForNonUsArchives />} />
           <Route path="/custom-views" element={<CustomViewsPage />} />
+          <Route path="/evidence-confidence-ledger" element={<EvidenceConfidenceLedger />} />
 </Routes>
     </Router>
   );
