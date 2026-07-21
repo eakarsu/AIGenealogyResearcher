@@ -5,7 +5,7 @@ const { pool } = require('../db');
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'genealogy-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {

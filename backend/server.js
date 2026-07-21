@@ -70,6 +70,7 @@ app.use('/api/evidence-confidence-ledger', require('./routes/evidenceConfidenceL
 
 // Custom Views (Genealogy Views) — mounted before any 404 handler
 app.use('/api/custom-views', require('./routes/customViews'));
+app.use('/api/governed-research', require('./governance'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -79,7 +80,7 @@ app.get('/api/health', (req, res) => {
 // Start server
 async function start() {
   try {
-    await initDB();
+    if (process.env.AUTO_INIT_SCHEMA === 'true') await initDB();
     
 app.use('/api/gap-no-conflict-resolution-endpoint-for-disa', route_gap_no_conflict_resolution_endpoint_for_disa);
 app.use('/api/gap-no-research-roadmap-recommender-for-next', route_gap_no_research_roadmap_recommender_for_next);

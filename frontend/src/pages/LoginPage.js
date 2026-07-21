@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTree, FaEnvelope, FaLock, FaSignInAlt, FaMagic } from 'react-icons/fa';
+import { FaTree, FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
 import { login } from '../services/api';
 
 const LoginPage = () => {
@@ -23,11 +23,6 @@ const LoginPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAutoFill = () => {
-    setEmail('admin@genealogy.com');
-    setPassword('password123');
   };
 
   return (
@@ -74,9 +69,6 @@ const LoginPage = () => {
             {loading ? <div className="spinner" /> : <><FaSignInAlt /> Sign In</>}
           </button>
 
-          <button type="button" onClick={handleAutoFill} style={styles.autoFillBtn}>
-            <FaMagic /> Auto Fill
-          </button>
         </form>
 
         <div style={styles.footer}>
