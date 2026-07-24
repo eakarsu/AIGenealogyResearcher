@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_URL = `${(process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '')}/chat/completions`;
 
 async function callAI(systemPrompt, userMessage) {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -35,7 +35,9 @@ async function callAI(systemPrompt, userMessage) {
     if (!choice) {
       throw new Error('No response from AI model');
     }
-    return choice.message.content;
+    const content = choice.message?.content;
+    if (!content || !String(content).trim()) throw new Error('OpenRouter returned empty content');
+    return content;
   } catch (err) {
     if (err.response) {
       throw new Error(`OpenRouter API error: ${err.response.status} - ${JSON.stringify(err.response.data)}`);
