@@ -7,19 +7,25 @@ if (process.env.ALLOW_DEMO_SEED !== 'true' || process.env.NODE_ENV === 'producti
 const bcrypt = require('bcryptjs');
 const { pool, initDB } = require('./db');
 
+function requireDemoPassword() {
+  const password = process.env.DEMO_PASSWORD || process.env.SEED_DEMO_PASSWORD || process.env.DEMO_SEED_PASSWORD || '';
+  if (password.length < 12 || password.length > 1024) throw new Error('DEMO_PASSWORD must contain 12-1024 characters');
+  return password;
+}
+
 async function seed() {
   try {
     await initDB();
     console.log('Seeding database...');
 
     // Create default user
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash(requireDemoPassword(), 10);
     await pool.query(
       `INSERT INTO users (email, password, name) VALUES ($1, $2, $3)
        ON CONFLICT (email) DO NOTHING`,
       ['admin@genealogy.com', hashedPassword, 'Admin User']
     );
-    console.log('Default user created (admin@genealogy.com / password123)');
+    console.log('Demo login users provisioned from the local environment.');
 
     // Seed persons
     const persons = [
