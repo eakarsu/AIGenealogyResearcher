@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import AppSidebar from './components/AppSidebar';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
@@ -158,10 +160,19 @@ const features = [
   }
 ];
 
+function SidebarFrame({ children }) {
+  const location = useLocation();
+  const show = Boolean(localStorage.getItem('token')) && location.pathname !== '/' && !['/login', '/register'].includes(location.pathname);
+  return <div className={show ? 'codex-nav-shell' : undefined}>
+    {show && <AppSidebar extraLinks={features.map(feature => ({ to: `/${feature.path}`, label: feature.name, group: 'Workspace' }))} />}
+    {children}
+  </div>;
+}
+
 function App() {
   return (
     <Router>
-      <Routes>
+      <SidebarFrame><Routes>
         <Route path="/insights/timeline" element={<TimelineView />} />
         <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
         <Route path="/codex/operations" element={<CodexOperationsFeature />} />
@@ -210,7 +221,7 @@ function App() {
           <Route path="/gap-limited-support-for-non-us-archives" element={<GapLimitedSupportForNonUsArchives />} />
           <Route path="/custom-views" element={<CustomViewsPage />} />
           <Route path="/evidence-confidence-ledger" element={<EvidenceConfidenceLedger />} />
-</Routes>
+</Routes></SidebarFrame>
     </Router>
   );
 }
