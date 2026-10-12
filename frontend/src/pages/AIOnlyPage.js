@@ -1,8 +1,9 @@
+import NativeAIControls from "../components/NativeAIControls.jsx";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBrain, FaPaperPlane, FaFont, FaClock, FaHistory } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import AIResultDisplay from '../components/AIResultDisplay';
+import AIReport from '../components/AIReport';
 import { aiQuery, getAll } from '../services/api';
 
 const featureConfig = {
@@ -92,7 +93,7 @@ const AIOnlyPage = ({ feature }) => {
   const IconComponent = config.icon;
 
   return (
-    <div style={styles.page}>
+    <NativeAIControls busy={loading} context="GenealogyResearcher"><div style={styles.page}>
       <Navbar showBack breadcrumb={config.title} />
 
       {toast && (
@@ -115,7 +116,7 @@ const AIOnlyPage = ({ feature }) => {
         <div style={styles.inputCard} className="animate-fade-in-up">
           <label style={styles.label}>{config.queryLabel}</label>
           {config.inputType === 'textarea' ? (
-            <textarea
+            <textarea data-ai-field={"query"}
               style={styles.textarea}
               placeholder={config.placeholder}
               value={query}
@@ -123,7 +124,7 @@ const AIOnlyPage = ({ feature }) => {
               rows={5}
             />
           ) : (
-            <input
+            <input data-ai-field={"query"}
               style={styles.input}
               type="text"
               placeholder={config.placeholder}
@@ -167,7 +168,7 @@ const AIOnlyPage = ({ feature }) => {
 
         {/* Result */}
         {result && (
-          <AIResultDisplay result={result} timestamp={new Date().toISOString()} />
+          <AIReport response={result} title={config.title} />
         )}
 
         {/* History */}
@@ -201,7 +202,7 @@ const AIOnlyPage = ({ feature }) => {
           </div>
         )}
       </div>
-    </div>
+    </div></NativeAIControls>
   );
 };
 

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPaperPlane, FaBalanceScale, FaRoad } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import AIResultDisplay from '../components/AIResultDisplay';
+import AIReport from '../components/AIReport';
+import NativeAIControls from '../components/NativeAIControls';
 import { aiQuery } from '../services/api';
 
 /**
@@ -75,7 +76,8 @@ export default function AIAdvancedPage() {
   const IconComponent = config.icon;
 
   return (
-    <div style={styles.page}>
+    <NativeAIControls busy={loading} context={config.title}>
+      <div style={styles.page}>
       <Navbar showBack breadcrumb="AI Advanced" />
 
       {toast && (
@@ -119,6 +121,8 @@ export default function AIAdvancedPage() {
         <div style={styles.inputCard} className="animate-fade-in-up">
           <label style={styles.label}>{config.queryLabel}</label>
           <textarea
+            data-ai-field="query"
+            name="query"
             style={styles.textarea}
             placeholder={config.placeholder}
             value={query}
@@ -128,6 +132,8 @@ export default function AIAdvancedPage() {
 
           <label style={{ ...styles.label, marginTop: 16 }}>Additional context (optional)</label>
           <textarea
+            data-ai-field="context"
+            name="context"
             style={styles.textarea}
             placeholder="Sources you've consulted, family lore, alternative spellings..."
             value={extra}
@@ -164,9 +170,10 @@ export default function AIAdvancedPage() {
           </div>
         )}
 
-        {result && <AIResultDisplay result={result} timestamp={new Date().toISOString()} />}
+        {result && <AIReport response={result} title={config.title} />}
       </div>
     </div>
+    </NativeAIControls>
   );
 }
 

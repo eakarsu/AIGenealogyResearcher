@@ -75,6 +75,40 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /api/auth/demo — local/demo convenience without exposing a password.
+router.post('/demo', async (_req, res) => {
+  if (process.env.NODE_ENV === 'production' || !process.env.DEMO_PASSWORD) {
+    return res.status(404).json({ error: 'Demo login is unavailable' });
+  }
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', ['admin@genealogy.com']);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Demo account is not provisioned' });
+    }
+
+    const user = result.rows[0];
+    const validPassword = await bcrypt.compare(process.env.DEMO_PASSWORD, user.password);
+    if (!validPassword) {
+      return res.status(503).json({ error: 'Demo account credentials are out of sync' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        created_at: user.created_at,
+      },
+    });
+  } catch (err) {
+    console.error('Demo login error:', err.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/auth/me
 router.get('/me', async (req, res) => {
   try {

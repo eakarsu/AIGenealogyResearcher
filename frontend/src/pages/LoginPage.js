@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaTree, FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
-import { login } from '../services/api';
+import { demoLogin, login } from '../services/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -10,8 +10,8 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (event) => {
+    event.preventDefault();
     setError('');
     setLoading(true);
     try {
@@ -20,6 +20,21 @@ const LoginPage = () => {
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    if (loading) return;
+    setError('');
+    setLoading(true);
+    try {
+      const data = await demoLogin();
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Demo login is unavailable.');
     } finally {
       setLoading(false);
     }
@@ -67,12 +82,12 @@ const LoginPage = () => {
 
           <button
             type="button"
-            onClick={() => { setEmail(process.env.REACT_APP_DEMO_EMAIL || ''); setPassword(process.env.REACT_APP_DEMO_PASSWORD || ''); }}
-            disabled={!process.env.REACT_APP_DEMO_EMAIL || !process.env.REACT_APP_DEMO_PASSWORD}
-            aria-label="Auto Fill Demo Credentials"
-            style={{ width: '100%', marginBottom: '12px', padding: '10px 14px', borderRadius: '8px', border: '1px solid currentColor', background: 'transparent', cursor: 'pointer' }}
+            onClick={handleDemoLogin}
+            disabled={loading}
+            aria-label="Log in as Demo"
+            style={{ width: '100%', marginBottom: '12px', padding: '10px 14px', borderRadius: '8px', border: '1px solid currentColor', background: 'transparent', cursor: loading ? 'not-allowed' : 'pointer' }}
           >
-            Auto Fill Demo Credentials
+            Log in as Demo
           </button>
           <button type="submit" style={styles.loginBtn} disabled={loading}>
             {loading ? <div className="spinner" /> : <><FaSignInAlt /> Sign In</>}

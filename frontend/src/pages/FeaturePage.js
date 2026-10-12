@@ -4,7 +4,8 @@ import { FaPlus, FaBrain, FaPaperPlane, FaSearch } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import FormModal from '../components/FormModal';
 import DetailModal from '../components/DetailModal';
-import AIResultDisplay from '../components/AIResultDisplay';
+import AIReport from '../components/AIReport';
+import NativeAIControls from '../components/NativeAIControls';
 import { getAll, create, update, deleteRecord, aiQuery } from '../services/api';
 
 const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature }) => {
@@ -147,6 +148,7 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
 
         {/* AI Section */}
         {aiFeature && (
+          <NativeAIControls busy={aiLoading} context={`${displayName} AI analysis`}>
           <div style={styles.aiSection}>
             <div style={styles.aiHeader}>
               <FaBrain style={{ color: '#6c63ff', fontSize: '1.2rem' }} />
@@ -156,6 +158,8 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
               <div style={styles.aiInputWrapper}>
                 <FaSearch style={styles.aiSearchIcon} />
                 <input
+                  data-ai-field="query"
+                  name="query"
                   style={styles.aiInput}
                   type="text"
                   placeholder="Ask AI to analyze your records..."
@@ -177,12 +181,13 @@ const FeaturePage = ({ tableName, displayName, columns, formFields, aiFeature })
               </button>
             </div>
             {aiResult && (
-              <AIResultDisplay
-                result={aiResult}
-                timestamp={new Date().toISOString()}
+              <AIReport
+                response={aiResult}
+                title={`${displayName} AI analysis`}
               />
             )}
           </div>
+          </NativeAIControls>
         )}
 
         {/* Data Table */}
